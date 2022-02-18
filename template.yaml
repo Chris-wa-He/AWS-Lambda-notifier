@@ -2,16 +2,16 @@ Transform: AWS::Serverless-2016-10-31
 
 Metadata:
   AWS::ServerlessRepo::Application:
-    Name: DingTalk-Notifier
-    Description: DingTalk Notifier
+    Name: Feishu-Notifier
+    Description: Feishu Notifier
     Author: Chris He
     SpdxLicenseId: Apache-2.0
     LicenseUrl: LICENSE.txt
     ReadmeUrl: README_sar.md
-    Labels: ['DingTalk', 'Eventbridge']
-    HomePageUrl: https://github.com/Chris-wa-He/DingTalk-notifier
+    Labels: ['Feishu', 'Eventbridge']
+    HomePageUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
     SemanticVersion: 1.2.0
-    SourceCodeUrl: https://github.com/Chris-wa-He/DingTalk-notifier
+    SourceCodeUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
 
 
 Parameters:
@@ -20,10 +20,10 @@ Parameters:
     Description: "Chat bot security token"
 
 Resources:
-  DingTalkNotifierLambdaLayer:
+  FeishuNotifierLambdaLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: DingTalkNotifierCommon
+      LayerName: FeishuNotifierCommon
       Description: v.1.0.5
       ContentUri: layer/
       CompatibleRuntimes:
@@ -32,21 +32,15 @@ Resources:
       - python3.8
       - python3.9
 
-  DingTalkNotifierLambda:
+  FeishuNotifierLambda:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: notifier/
       Handler: app.lambda_handler
       Layers: 
-        - !Ref DingTalkNotifierLambdaLayer
+        - !Ref FeishuNotifierLambdaLayer
       Environment:
         Variables:
-#          CORPID:
-#            Ref: CORPIDParameter
-#          AGENTID:
-#            Ref: AGENTIDParameter
-#          CORPSECRET_ARN:
-#            Ref: CORPSECRET
           TOKEN_ARN:
             Ref: TOKEN
       Runtime: python3.9
@@ -57,12 +51,12 @@ Resources:
         SNSEvent:
           Type: SNS
           Properties: 
-            Topic: !Ref DingTalkNotifierSNSTopic
+            Topic: !Ref FeishuNotifierSNSTopic
           
-  DingTalkNotifierSNSTopic:
+  FeishuNotifierSNSTopic:
     Type: AWS::SNS::Topic
 
-  DingTalkNotifierSNSTopicPolicy:
+  FeishuNotifierSNSTopicPolicy:
     Type: AWS::SNS::TopicPolicy
     Properties:
       PolicyDocument:
@@ -75,7 +69,7 @@ Resources:
               AWS: "*"
             Action: 
               - sns:Publish
-            Resource: !Ref DingTalkNotifierSNSTopic
+            Resource: !Ref FeishuNotifierSNSTopic
             Condition:
               StringEquals:
                 "AWS:SourceOwner": !Ref "AWS::AccountId"
@@ -85,9 +79,9 @@ Resources:
               Service: "events.amazonaws.com"
             Action: 
               - sns:Publish
-            Resource: !Ref DingTalkNotifierSNSTopic
+            Resource: !Ref FeishuNotifierSNSTopic
       Topics:
-      - !Ref DingTalkNotifierSNSTopic
+      - !Ref FeishuNotifierSNSTopic
 
   TOKEN:
     Type: AWS::SecretsManager::Secret
@@ -99,7 +93,7 @@ Resources:
   EventRuleEC2StateChange:
     Type: AWS::Events::Rule
     Properties:
-      Description: DingTalk notification：EC2 instance state change
+      Description: Feishu notification：EC2 instance state change
       EventPattern: 
         source: 
           - aws.ec2
@@ -111,7 +105,7 @@ Resources:
             - stopped
             - terminated
       Targets:
-        - Arn: !Ref DingTalkNotifierSNSTopic
+        - Arn: !Ref FeishuNotifierSNSTopic
           Id: Send2SNS
           InputTransformer:
             InputPathsMap:
@@ -125,14 +119,14 @@ Resources:
   EventRuleEC2Health:
     Type: AWS::Events::Rule
     Properties:
-      Description: DingTalk notification：AWS Health event
+      Description: Feishu notification：AWS Health event
       EventPattern: 
         source: 
           - aws.health
         detail-type: 
           - AWS Health Event
       Targets:
-        - Arn: !Ref DingTalkNotifierSNSTopic
+        - Arn: !Ref FeishuNotifierSNSTopic
           Id: Send2SNS
           InputTransformer:
             InputPathsMap:

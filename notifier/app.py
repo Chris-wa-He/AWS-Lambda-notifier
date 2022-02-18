@@ -1,7 +1,7 @@
 import boto3
 import os
 
-from dingtalk import DingTalk
+from feishu import Feishu
 from alarm import Alarm
 
 secretTokenArn = os.environ['TOKEN_ARN']
@@ -13,20 +13,20 @@ get_secret_value_response = secret_manager_client.get_secret_value(
     )
 secretToken = get_secret_value_response['SecretString']
 
-# Initial DingTalk handler
-dingtalk=DingTalk(secretToken)
+# Initial Feishu handler
+feishu=Feishu(secretToken)
 
 def lambda_handler(event, context):
     print(event)
     msg = msg_format(event)
     print(msg)
 
-    dtAlarm = Alarm(
+    fsAlarm = Alarm(
 
         description=msg,
     )
 
-    dingtalk.send_text_msg(dtAlarm)
+    feishu.send_text_msg(fsAlarm)
 
     response = {
         "statusCode": 200,
