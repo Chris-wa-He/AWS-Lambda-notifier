@@ -1,32 +1,32 @@
 import boto3
 import os
 
-from dingtalk import DingTalk
+from slack import Slack
 from alarm import Alarm
 
-secretTokenArn = os.environ['TOKEN_ARN']
+secretArn = os.environ['SECRET_ARN']
 
-# Get chat bot token from Secrets Manager
+# Get chat bot url from Secrets Manager
 secret_manager_client = boto3.client('secretsmanager')
 get_secret_value_response = secret_manager_client.get_secret_value(
-        SecretId=secretTokenArn
+        SecretId=secretArn
     )
-secretToken = get_secret_value_response['SecretString']
+secretURL = get_secret_value_response['SecretString']
 
-# Initial DingTalk handler
-dingtalk=DingTalk(secretToken)
+# Initial Slack handler
+slack=Slack(secretURL)
 
 def lambda_handler(event, context):
     print(event)
     msg = msg_format(event)
     print(msg)
 
-    dtAlarm = Alarm(
+    slackAlarm = Alarm(
 
         description=msg,
     )
 
-    dingtalk.send_text_msg(dtAlarm)
+    slack.send_text_msg(slackAlarm)
 
     response = {
         "statusCode": 200,

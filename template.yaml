@@ -2,28 +2,28 @@ Transform: AWS::Serverless-2016-10-31
 
 Metadata:
   AWS::ServerlessRepo::Application:
-    Name: DingTalk-Notifier
-    Description: DingTalk Notifier
+    Name: Slack-Notifier
+    Description: Slack Notifier
     Author: Chris He
     SpdxLicenseId: Apache-2.0
     LicenseUrl: LICENSE.txt
     ReadmeUrl: README_sar.md
-    Labels: ['DingTalk', 'Eventbridge']
-    HomePageUrl: https://github.com/Chris-wa-He/DingTalk-notifier
+    Labels: ['Slack', 'Eventbridge']
+    HomePageUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
     SemanticVersion: 1.2.0
-    SourceCodeUrl: https://github.com/Chris-wa-He/DingTalk-notifier
+    SourceCodeUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
 
 
 Parameters:
-  TokenParameter:
+  WebhookURL:
     Type: String
-    Description: "Chat bot security token"
+    Description: "Slack Webhook URL"
 
 Resources:
-  DingTalkNotifierLambdaLayer:
+  SlackNotifierLambdaLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: DingTalkNotifierCommon
+      LayerName: SlackNotifierCommon
       Description: v.1.0.5
       ContentUri: layer/
       CompatibleRuntimes:
@@ -32,37 +32,31 @@ Resources:
       - python3.8
       - python3.9
 
-  DingTalkNotifierLambda:
+  SlackNotifierLambda:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: notifier/
       Handler: app.lambda_handler
       Layers: 
-        - !Ref DingTalkNotifierLambdaLayer
+        - !Ref SlackNotifierLambdaLayer
       Environment:
         Variables:
-#          CORPID:
-#            Ref: CORPIDParameter
-#          AGENTID:
-#            Ref: AGENTIDParameter
-#          CORPSECRET_ARN:
-#            Ref: CORPSECRET
-          TOKEN_ARN:
-            Ref: TOKEN
+          SECRET_ARN:
+            Ref: WebhookSecret
       Runtime: python3.9
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
-            SecretArn: !Ref TOKEN
+            SecretArn: !Ref WebhookSecret
       Events:
         SNSEvent:
           Type: SNS
           Properties: 
-            Topic: !Ref DingTalkNotifierSNSTopic
+            Topic: !Ref SlackNotifierSNSTopic
           
-  DingTalkNotifierSNSTopic:
+  SlackNotifierSNSTopic:
     Type: AWS::SNS::Topic
 
-  DingTalkNotifierSNSTopicPolicy:
+  SlackNotifierSNSTopicPolicy:
     Type: AWS::SNS::TopicPolicy
     Properties:
       PolicyDocument:
@@ -75,7 +69,7 @@ Resources:
               AWS: "*"
             Action: 
               - sns:Publish
-            Resource: !Ref DingTalkNotifierSNSTopic
+            Resource: !Ref SlackNotifierSNSTopic
             Condition:
               StringEquals:
                 "AWS:SourceOwner": !Ref "AWS::AccountId"
@@ -85,21 +79,21 @@ Resources:
               Service: "events.amazonaws.com"
             Action: 
               - sns:Publish
-            Resource: !Ref DingTalkNotifierSNSTopic
+            Resource: !Ref SlackNotifierSNSTopic
       Topics:
-      - !Ref DingTalkNotifierSNSTopic
+      - !Ref SlackNotifierSNSTopic
 
-  TOKEN:
+  WebhookSecret:
     Type: AWS::SecretsManager::Secret
     Properties: 
-      Description: 'Token: Chat bot token'
+      Description: 'Webhook URL'
       SecretString:
-        Ref: TokenParameter
+        Ref: WebhookURL
 
   EventRuleEC2StateChange:
     Type: AWS::Events::Rule
     Properties:
-      Description: DingTalk notification：EC2 instance state change
+      Description: Slack notification：EC2 instance state change
       EventPattern: 
         source: 
           - aws.ec2
@@ -111,7 +105,7 @@ Resources:
             - stopped
             - terminated
       Targets:
-        - Arn: !Ref DingTalkNotifierSNSTopic
+        - Arn: !Ref SlackNotifierSNSTopic
           Id: Send2SNS
           InputTransformer:
             InputPathsMap:
@@ -125,14 +119,14 @@ Resources:
   EventRuleEC2Health:
     Type: AWS::Events::Rule
     Properties:
-      Description: DingTalk notification：AWS Health event
+      Description: Slack notification：AWS Health event
       EventPattern: 
         source: 
           - aws.health
         detail-type: 
           - AWS Health Event
       Targets:
-        - Arn: !Ref DingTalkNotifierSNSTopic
+        - Arn: !Ref SlackNotifierSNSTopic
           Id: Send2SNS
           InputTransformer:
             InputPathsMap:

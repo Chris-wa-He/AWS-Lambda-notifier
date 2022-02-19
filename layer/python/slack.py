@@ -2,35 +2,31 @@ import requests
 import json
 
 
-class DingTalk:
+class Slack:
     s = requests.session()
-    secretToken = None
+    secretURL = None
 
-    def __init__(self, token):
-        self.secretToken = token
+    def __init__(self, url):
+        self.secretURL = url
 
     # Send text alarm
-    def send_text_msg(self, dtAlarm):
-        url = "https://oapi.dingtalk.com/robot/send?access_token=" + self.secretToken
+    def send_text_msg(self, slackAlarm):
+        url = self.secretURL
         header = {
             "Content-Type": "application/json"
         }
         form_data = {
-            "msgtype": "text",
-            "text": {
-                "content": dtAlarm.description
-            }
+            "text": slackAlarm.description
         }
         rep = self.s.post(url, data=json.dumps(form_data).encode('utf-8'), headers=header)
         print(rep.text)
         if rep.status_code == 200:
-            content = json.loads(rep.content)
-            if content['errcode'] == 0:
+            if rep.text == 'ok':
                 # Success
                 # print('Message Sent.')
                 pass
             else:
-                raise Exception('Errcode: {} , Errmsg: {}'.format(content['errcode'], content['errmsg']))
+                raise Exception('Errcode: {} , Errmsg: {}'.format('500', 'Sent Slack message fail'))
         else:
             raise Exception('Request failed with status_code: {}'.format(rep.status_code))
 
