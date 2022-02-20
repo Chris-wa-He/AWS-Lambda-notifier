@@ -4,14 +4,14 @@ import json
 
 class Feishu:
     s = requests.session()
-    secretToken = None
+    secretURL = None
 
-    def __init__(self, token):
-        self.secretToken = token
+    def __init__(self, url):
+        self.secretURL = url
 
     # Send text alarm
     def send_text_msg(self, fsAlarm):
-        url = "https://open.feishu.cn/open-apis/bot/v2/hook/" + self.secretToken
+        url = self.secretURL
         header = {
             "Content-Type": "application/json"
         }
@@ -19,7 +19,6 @@ class Feishu:
             "msg_type": "text",
             "content": {
                 "text": fsAlarm.description
-                # "text": "EC2"
             }
         }
         rep = self.s.post(url, data=json.dumps(form_data).encode('utf-8'), headers=header)

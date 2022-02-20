@@ -15,9 +15,9 @@ Metadata:
 
 
 Parameters:
-  TokenParameter:
+  WebhookURL:
     Type: String
-    Description: "Chat bot security token"
+    Description: "Feishu Chat bot URL includes security token.\n Sample: https://open.feishu.cn/open-apis/bot/v2/hook/XXXXXXXX"
 
 Resources:
   FeishuNotifierLambdaLayer:
@@ -41,12 +41,12 @@ Resources:
         - !Ref FeishuNotifierLambdaLayer
       Environment:
         Variables:
-          TOKEN_ARN:
-            Ref: TOKEN
+          SECRET_ARN:
+            Ref: WebhookSecret
       Runtime: python3.9
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
-            SecretArn: !Ref TOKEN
+            SecretArn: !Ref WebhookSecret
       Events:
         SNSEvent:
           Type: SNS
@@ -83,12 +83,12 @@ Resources:
       Topics:
       - !Ref FeishuNotifierSNSTopic
 
-  TOKEN:
+  WebhookSecret:
     Type: AWS::SecretsManager::Secret
     Properties: 
-      Description: 'Token: Chat bot token'
+      Description: 'WebhookSecret: Store Chat bot URL'
       SecretString:
-        Ref: TokenParameter
+        Ref: WebhookURL
 
   EventRuleEC2StateChange:
     Type: AWS::Events::Rule
