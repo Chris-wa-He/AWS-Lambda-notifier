@@ -42,6 +42,9 @@
 2022-02-18:
 飞书机器人纯文本警告推送功能实现。
 
+2022-02-20:
+修改 Secrets Manager 中存储 security token 为存储整个 Webhook URL。
+
 ## 附录
 
 [AWS博客：企业微信、钉钉接收 Amazon CloudWatch 告警
