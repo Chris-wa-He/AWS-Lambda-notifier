@@ -1,29 +1,46 @@
-# DingTalk-Notifier 钉钉告警通知
+# Slack-Notifier Slack告警通知
 
 我们在使用AWS时偶尔会在管理员邮箱中收到AWS关于EC2维护信息的通知邮件，这些邮件很容易淹没在收件箱中，没有得到及时处理。很多客户希望能够更及时收到这类消息，比如从微信或是钉钉等即时通信软件收到这类消息通知。
 
 微信或钉钉等即时通信工具均提供了消息接口，第三方应用获取授权后，通过调用这些接口即可往客户端发送消息。在AWS上可以在EventBridge/Cloudwatch Event中配置事件规则，即可以触发一个Lambda运行微信/钉钉接口调用的处理逻辑。讲解这方面设计的博客和技术文章也比较多了，具体可以参考附录的一些链接。
 
-这个项目会多做一点点，提供一个无须编写代码快速部署钉钉告警通知的功能。在Serverless Application Repository 中可以通过填入钉钉机器人接口相关的参数，即可快速部署整套钉钉告警通知的相关组件，涉及的 AWS 服务包括 EventBridge, SNS, Lambda 和 Secrets Manager 等。如下是整体的部署架构：
+这个项目会多做一点点，提供一个无须编写代码快速部署 Slack 告警通知的功能。在Serverless Application Repository 中可以通过填入 Slack Incoming WebHook 接口相关的参数，即可快速部署整套 Slack 告警通知的相关组件，涉及的 AWS 服务包括 EventBridge, SNS, Lambda 和 Secrets Manager 等。如下是整体的部署架构：
 
 ![整体部署架构](images/architecture.png)
 
-为方便演示，这个应用部署时创建了两个EventBridge的Rule，一个是捕获EC2的状态变化事件（如开关机），另一个是捕获EC2健康事件（如EC2计划维护事件）。因此部署后可以通过简单的启动或关闭EC2实例来检查是否可以在钉钉收到通知。
+为方便演示，这个应用部署时创建了两个EventBridge的Rule，一个是捕获EC2的状态变化事件（如开关机），另一个是捕获EC2健康事件（如EC2计划维护事件）。因此部署后可以通过简单的启动或关闭EC2实例来检查是否可以在 Slack 收到通知。
+
+## Slack Incoming WebHook 创建与 Webhook URL
+
+配置 Slack Incoming WebHook，请参考[官方说明](https://slack.com/intl/zh-cn/help/articles/115005265063-%E9%80%82%E7%94%A8%E4%BA%8E-Slack-%E7%9A%84-Incoming-Webhook)
+
+获取 Incoming WebHook 的 Webhook URL，作为部署的参数。[API说明](https://api.slack.com/messaging/webhooks)
+![获取webhook](images/webhook.png)
 
 ## 在 Serverless Application Repository 中部署此应用
 
-可以在 SAR 中搜索 `DingTalk-notifier` 查到本应用（注意因为本项目会创建 EventBridge 到 SNS Publish 权限，所以按下图进行勾选。
+可以在 SAR 中搜索 `Slack-Notifier` 查到本应用（注意因为本项目会创建 EventBridge 到 SNS Publish 权限，所以按下图进行勾选。
 
 ![查找](images/search_sar.png)
 
+部署应用时填入自定义机器人的整个 Webhook URL
+
+![部署](images/deployment.png)
+
+## 提示效果
+
+提示效果如下：
+
+![提示效果](images/notification.png)
+
 ## 致谢
 
-本项目基于 Niko Feng 企业微信对接[项目](https://github.com/nikosheng/wechat-lambda-layer-sam) 与 Randy Lin SAR部署[项目](https://github.com/linjungz/wechat-notifier.git) 的基础上修改钉钉对接实现及部署模板完成。在此对 Niko 与 Randy 表示感谢！
+本项目基于 Niko Feng 企业微信对接[项目](https://github.com/nikosheng/wechat-lambda-layer-sam) 与 Randy Lin SAR部署[项目](https://github.com/linjungz/wechat-notifier.git) 的基础上修改 Slack 对接实现及部署模板完成。在此对 Niko 与 Randy 表示感谢！
 
 ## 更新历史
 
-2022-02-16:
-钉钉机器人纯文本警告推送功能实现。
+2022-02-19:
+Slack Incoming WebHook 纯文本警告推送功能实现。
 
 ## 附录
 
