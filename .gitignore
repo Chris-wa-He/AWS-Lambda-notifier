@@ -104,6 +104,8 @@ fabric.properties
 # modules.xml
 # .idea/misc.xml
 # *.ipr
+.idea/
+.aws-sam/
 
 # Sonarlint plugin
 .idea/sonarlint
