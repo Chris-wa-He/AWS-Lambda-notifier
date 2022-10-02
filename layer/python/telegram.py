@@ -2,7 +2,7 @@ import requests
 import json
 
 
-class Feishu:
+class Telegram:
     s = requests.session()
     secretURL = None
 
@@ -10,27 +10,25 @@ class Feishu:
         self.secretURL = url
 
     # Send text alarm
-    def send_text_msg(self, fsAlarm):
+    def send_text_msg(self, chat_id, tg_alarm):
         url = self.secretURL
         header = {
             "Content-Type": "application/json"
         }
         form_data = {
-            "msg_type": "text",
-            "content": {
-                "text": fsAlarm.description
-            }
+            "chat_id": chat_id,
+            "text": tg_alarm.description
         }
         rep = self.s.post(url, data=json.dumps(form_data).encode('utf-8'), headers=header)
         print(rep.text)
         if rep.status_code == 200:
             content = json.loads(rep.content)
 
-            if 'StatusCode' in content and content['StatusCode'] == 0:
+            if 'ok' in content and content['ok'] is True:
                 # Success
                 pass
             else:
-                raise Exception('Errcode: {} , Errmsg: {}'.format(content['code'], content['msg']))
+                raise Exception('Errcode: {} , Errmsg: {}'.format(content['error_code'], content['description']))
         else:
             raise Exception('Request failed with status_code: {}'.format(rep.status_code))
 

@@ -2,61 +2,69 @@ Transform: AWS::Serverless-2016-10-31
 
 Metadata:
   AWS::ServerlessRepo::Application:
-    Name: Feishu-Notifier
-    Description: Feishu Notifier
+    Name: Telegram-Notifier
+    Description: Telegram Notifier
     Author: Chris He
     SpdxLicenseId: Apache-2.0
     LicenseUrl: LICENSE.txt
     ReadmeUrl: README_sar.md
-    Labels: ['Feishu', 'Eventbridge']
+    Labels: [ 'Telegram', 'Eventbridge' ]
     HomePageUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
     SemanticVersion: 1.2.0
     SourceCodeUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
 
 
 Parameters:
-  WebhookURL:
+  BotToken:
     Type: String
-    Description: "Feishu Chat bot URL includes security token.\n Sample: https://open.feishu.cn/open-apis/bot/v2/hook/XXXXXXXX"
+    Description: "Telegram bot ID.\n Sample: <numbers>:<UUID>"
+  ChatId:
+    Type: String
+    Description: "Telegram chat ID. User ID or Group ID is accepted.\n Sample: userId:xxxxxxxxxx, groupId:-xxxxxxxxxx"
 
 Resources:
-  FeishuNotifierLambdaLayer:
+  TelegramNotifierLambdaLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: FeishuNotifierCommon
+      LayerName: TelegramNotifierCommon
       Description: v.1.0.5
       ContentUri: layer/
       CompatibleRuntimes:
-      - python3.6
-      - python3.7
-      - python3.8
-      - python3.9
+        - python3.6
+        - python3.7
+        - python3.8
+        - python3.9
 
-  FeishuNotifierLambda:
+  TelegramNotifierLambda:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: notifier/
       Handler: app.lambda_handler
-      Layers: 
-        - !Ref FeishuNotifierLambdaLayer
+      Layers:
+        - !Ref TelegramNotifierLambdaLayer
       Environment:
         Variables:
-          SECRET_ARN:
-            Ref: WebhookSecret
+          SEND_MSG_URL: 'https://api.telegram.org/bot{}/sendMessage'
+          BotTokenSecret_ARN:
+            Ref: BotTokenSecret
+          ChatIdSecret_ARN:
+            Ref: ChatIdSecret
       Runtime: python3.9
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
-            SecretArn: !Ref WebhookSecret
+            SecretArn: !Ref BotTokenSecret
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref ChatIdSecret
       Events:
         SNSEvent:
           Type: SNS
-          Properties: 
-            Topic: !Ref FeishuNotifierSNSTopic
-          
-  FeishuNotifierSNSTopic:
+          Properties:
+            Topic: !Ref TelegramNotifierSNSTopic
+
+  TelegramNotifierSNSTopic:
     Type: AWS::SNS::Topic
 
-  FeishuNotifierSNSTopicPolicy:
+  TelegramNotifierSNSTopicPolicy:
     Type: AWS::SNS::TopicPolicy
     Properties:
       PolicyDocument:
@@ -67,9 +75,9 @@ Resources:
             Effect: Allow
             Principal:
               AWS: "*"
-            Action: 
+            Action:
               - sns:Publish
-            Resource: !Ref FeishuNotifierSNSTopic
+            Resource: !Ref TelegramNotifierSNSTopic
             Condition:
               StringEquals:
                 "AWS:SourceOwner": !Ref "AWS::AccountId"
@@ -77,27 +85,34 @@ Resources:
             Effect: Allow
             Principal:
               Service: "events.amazonaws.com"
-            Action: 
+            Action:
               - sns:Publish
-            Resource: !Ref FeishuNotifierSNSTopic
+            Resource: !Ref TelegramNotifierSNSTopic
       Topics:
-      - !Ref FeishuNotifierSNSTopic
+        - !Ref TelegramNotifierSNSTopic
 
-  WebhookSecret:
+  BotTokenSecret:
     Type: AWS::SecretsManager::Secret
-    Properties: 
-      Description: 'WebhookSecret: Store Chat bot URL'
+    Properties:
+      Description: 'BotTokenSecret: Store bot token'
       SecretString:
-        Ref: WebhookURL
+        Ref: BotToken
+
+  ChatIdSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: 'ChatIdSecret: Store chat ID'
+      SecretString:
+        Ref: ChatId
 
   EventRuleEC2StateChange:
     Type: AWS::Events::Rule
     Properties:
-      Description: Feishu notification：EC2 instance state change
-      EventPattern: 
-        source: 
+      Description: Telegram notification：EC2 instance state change
+      EventPattern:
+        source:
           - aws.ec2
-        detail-type: 
+        detail-type:
           - EC2 Instance State-change Notification
         detail:
           state:
@@ -105,7 +120,7 @@ Resources:
             - stopped
             - terminated
       Targets:
-        - Arn: !Ref FeishuNotifierSNSTopic
+        - Arn: !Ref TelegramNotifierSNSTopic
           Id: Send2SNS
           InputTransformer:
             InputPathsMap:
@@ -119,14 +134,14 @@ Resources:
   EventRuleEC2Health:
     Type: AWS::Events::Rule
     Properties:
-      Description: Feishu notification：AWS Health event
-      EventPattern: 
-        source: 
+      Description: Telegram notification：AWS Health event
+      EventPattern:
+        source:
           - aws.health
-        detail-type: 
+        detail-type:
           - AWS Health Event
       Targets:
-        - Arn: !Ref FeishuNotifierSNSTopic
+        - Arn: !Ref TelegramNotifierSNSTopic
           Id: Send2SNS
           InputTransformer:
             InputPathsMap:

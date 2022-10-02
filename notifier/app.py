@@ -1,20 +1,33 @@
 import boto3
 import os
 
-from feishu import Feishu
+from telegram import Telegram
 from alarm import Alarm
 
-secretArn = os.environ['SECRET_ARN']
+send_msg_url = os.environ['SEND_MSG_URL']
 
-# Get chat bot URL includes token from Secrets Manager
+bot_token_secret_arn = os.environ['BotTokenSecret_ARN']
+chat_id_secret_arn = os.environ['ChatIdSecret_ARN']
+
 secret_manager_client = boto3.client('secretsmanager')
-get_secret_value_response = secret_manager_client.get_secret_value(
-    SecretId=secretArn
-)
-secretURL = get_secret_value_response['SecretString']
 
-# Initial Feishu handler
-feishu = Feishu(secretURL)
+# Get bot token from Secrets Manager
+bot_token_secret_response = secret_manager_client.get_secret_value(
+    SecretId=bot_token_secret_arn
+)
+bot_token = bot_token_secret_response['SecretString']
+
+# Get chat ID from Secrets Manager
+chat_id_secret_response = secret_manager_client.get_secret_value(
+    SecretId=chat_id_secret_arn
+)
+chat_id = chat_id_secret_response['SecretString']
+
+# Combine send message api url with bot token
+send_msg_api_url = send_msg_url.format(bot_token)
+
+# Initial Telegram handler
+telegram = Telegram(send_msg_api_url)
 
 
 def lambda_handler(event, context):
@@ -22,12 +35,12 @@ def lambda_handler(event, context):
     msg = msg_format(event)
     print(msg)
 
-    fsAlarm = Alarm(
+    tg_alarm = Alarm(
 
         description=msg,
     )
 
-    feishu.send_text_msg(fsAlarm)
+    telegram.send_text_msg(chat_id, tg_alarm)
 
     response = {
         "statusCode": 200,
