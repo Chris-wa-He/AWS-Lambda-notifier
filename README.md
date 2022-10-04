@@ -44,5 +44,8 @@ Slack Incoming WebHook 纯文本警告推送功能实现。
 
 ## 附录
 
+[AWS博客：基于AWS Serverless 一键启用微信/钉钉告警通知
+](https://aws.amazon.com/cn/blogs/china/enable-wechat-dingtalk-alarm-notification-with-one-click-based-on-aws-serverless/)
+
 [AWS博客：企业微信、钉钉接收 Amazon CloudWatch 告警
 ](https://aws.amazon.com/cn/blogs/china/enterprise-wechat-and-dingtalk-receiving-amazon-cloudwatch-alarms/)
