@@ -10,7 +10,7 @@ Metadata:
     ReadmeUrl: README_sar.md
     Labels: [ 'Telegram', 'Eventbridge' ]
     HomePageUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
-    SemanticVersion: 1.2.0
+    SemanticVersion: 1.3.0
     SourceCodeUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
 
 
@@ -21,6 +21,11 @@ Parameters:
   ChatId:
     Type: String
     Description: "Telegram chat ID. User ID or Group ID is accepted.\n Sample: userId:xxxxxxxxxx, groupId:-xxxxxxxxxx"
+
+  AnomalyThreshold:
+    Type: Number
+    Default: 100
+    Description: "Threshold for service anomaly use."
 
 Resources:
   TelegramNotifierLambdaLayer:
@@ -88,6 +93,13 @@ Resources:
             Action:
               - sns:Publish
             Resource: !Ref TelegramNotifierSNSTopic
+          - Sid: Costalerts_Statement
+            Effect: Allow
+            Principal:
+              Service: "costalerts.amazonaws.com"
+            Action:
+              - sns:Publish
+            Resource: !Ref TelegramNotifierSNSTopic
       Topics:
         - !Ref TelegramNotifierSNSTopic
 
@@ -104,6 +116,25 @@ Resources:
       Description: 'ChatIdSecret: Store chat ID'
       SecretString:
         Ref: ChatId
+
+  AnomalyServiceMonitor:
+    Type: "AWS::CE::AnomalyMonitor"
+    Properties:
+      MonitorName: "AllServiceMonitor"
+      MonitorType: "DIMENSIONAL"
+      MonitorDimension: "SERVICE"
+
+  AnomalySubscription:
+    Type: "AWS::CE::AnomalySubscription"
+    Properties:
+      SubscriptionName: "AnomalyServiceMonitoring"
+      Threshold: !Ref AnomalyThreshold
+      Frequency: "IMMEDIATE"
+      MonitorArnList:
+        - !Ref AnomalyServiceMonitor
+      Subscribers:
+        - Type: "SNS"
+          Address: !Ref SlackNotifierSNSTopic
 
   EventRuleEC2StateChange:
     Type: AWS::Events::Rule
