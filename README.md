@@ -45,6 +45,9 @@
 2022-02-20:
 修改 Secrets Manager 中存储 security token 为存储整个 Webhook URL。
 
+2022-10-16:
+添加 AWS Cost Anomaly Detection 集成。
+
 ## 附录
 
 [AWS博客：基于AWS Serverless 一键启用微信/钉钉告警通知
