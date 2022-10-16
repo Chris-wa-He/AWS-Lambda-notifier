@@ -134,7 +134,7 @@ Resources:
         - !Ref AnomalyServiceMonitor
       Subscribers:
         - Type: "SNS"
-          Address: !Ref SlackNotifierSNSTopic
+          Address: !Ref TelegramNotifierSNSTopic
 
   EventRuleEC2StateChange:
     Type: AWS::Events::Rule
