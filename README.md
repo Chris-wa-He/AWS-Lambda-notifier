@@ -42,6 +42,9 @@
 2022-02-19:
 Slack Incoming WebHook 纯文本警告推送功能实现。
 
+2022-10-16:
+添加 AWS Cost Anomaly Detection 集成。
+
 ## 附录
 
 [AWS博客：基于AWS Serverless 一键启用微信/钉钉告警通知
