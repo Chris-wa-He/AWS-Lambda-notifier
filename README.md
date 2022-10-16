@@ -25,6 +25,9 @@
 2021-03-25:
 调整 SNS Access Policy，权限由原来只能由 SNS 所在帐号 EventBridge 发布消息，改为由 SNS 所在帐号所有 AWS 服务均可发布消息，方便用户从其他 AWS 服务如 RDS 等设置事件通知告警并通知微信
 
+2022-10-16:
+添加 AWS Cost Anomaly Detection 集成。
+
 ## 附录
 
 [AWS博客：基于AWS Serverless 一键启用微信/钉钉告警通知
