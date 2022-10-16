@@ -4,14 +4,14 @@ Metadata:
   AWS::ServerlessRepo::Application:
     Name: WeChat-Notifier
     Description: Wechat Notifier
-    Author: Randy Lin
+    Author: Chris He
     SpdxLicenseId: Apache-2.0
     LicenseUrl: LICENSE.txt
     ReadmeUrl: README_sar.md
     Labels: ['WeChat', 'Eventbridge']
-    HomePageUrl: https://github.com/linjungz/wechat-notifier
-    SemanticVersion: 1.2.0
-    SourceCodeUrl: https://github.com/linjungz/wechat-notifier
+    HomePageUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
+    SemanticVersion: 1.3.0
+    SourceCodeUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
 
 Parameters:
   CORPIDParameter:
@@ -23,6 +23,11 @@ Parameters:
   AGENTIDParameter:
     Type: String
     Description: "应用AgentId"
+
+  AnomalyThreshold:
+    Type: Number
+    Default: 100
+    Description: "Threshold for service anomaly use."
 
 Resources:
   WeChatNotifierLambdaLayer:
@@ -88,6 +93,13 @@ Resources:
             Action: 
               - sns:Publish
             Resource: !Ref WeChatNotifierSNSTopic
+          - Sid: Costalerts_Statement
+            Effect: Allow
+            Principal:
+              Service: "costalerts.amazonaws.com"
+            Action:
+              - sns:Publish
+            Resource: !Ref WeChatNotifierSNSTopic
       Topics:
       - !Ref WeChatNotifierSNSTopic
 
@@ -97,6 +109,25 @@ Resources:
       Description: '存储密钥: 应用Secret'
       SecretString:
         Ref: CORPSECRETParameter
+
+  AnomalyServiceMonitor:
+    Type: "AWS::CE::AnomalyMonitor"
+    Properties:
+      MonitorName: "AllServiceMonitor"
+      MonitorType: "DIMENSIONAL"
+      MonitorDimension: "SERVICE"
+
+  AnomalySubscription:
+    Type: "AWS::CE::AnomalySubscription"
+    Properties:
+      SubscriptionName: "AnomalyServiceMonitoring"
+      Threshold: !Ref AnomalyThreshold
+      Frequency: "IMMEDIATE"
+      MonitorArnList:
+        - !Ref AnomalyServiceMonitor
+      Subscribers:
+        - Type: "SNS"
+          Address: !Ref WeChatNotifierSNSTopic
 
   EventRuleEC2StateChange:
     Type: AWS::Events::Rule
