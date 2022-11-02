@@ -56,12 +56,12 @@ Resources:
         SNSEvent:
           Type: SNS
           Properties: 
-            Topic: !Ref SlackNotifierSNSTopic
+            Topic: !Ref ServerlessNotifierSNSTopic
           
-  SlackNotifierSNSTopic:
+  ServerlessNotifierSNSTopic:
     Type: AWS::SNS::Topic
 
-  SlackNotifierSNSTopicPolicy:
+  ServerlessNotifierSNSTopicPolicy:
     Type: AWS::SNS::TopicPolicy
     Properties:
       PolicyDocument:
@@ -74,7 +74,7 @@ Resources:
               AWS: "*"
             Action: 
               - sns:Publish
-            Resource: !Ref SlackNotifierSNSTopic
+            Resource: !Ref ServerlessNotifierSNSTopic
             Condition:
               StringEquals:
                 "AWS:SourceOwner": !Ref "AWS::AccountId"
@@ -84,16 +84,16 @@ Resources:
               Service: "events.amazonaws.com"
             Action: 
               - sns:Publish
-            Resource: !Ref SlackNotifierSNSTopic
+            Resource: !Ref ServerlessNotifierSNSTopic
           - Sid: Costalerts_Statement
             Effect: Allow
             Principal:
               Service: "costalerts.amazonaws.com"
             Action:
               - sns:Publish
-            Resource: !Ref SlackNotifierSNSTopic
+            Resource: !Ref ServerlessNotifierSNSTopic
       Topics:
-      - !Ref SlackNotifierSNSTopic
+      - !Ref ServerlessNotifierSNSTopic
 
   WebhookSecret:
     Type: AWS::SecretsManager::Secret
@@ -119,7 +119,7 @@ Resources:
         - !Ref AnomalyServiceMonitor
       Subscribers:
         - Type: "SNS"
-          Address: !Ref SlackNotifierSNSTopic
+          Address: !Ref ServerlessNotifierSNSTopic
 
   EventRuleEC2StateChange:
     Type: AWS::Events::Rule
@@ -136,7 +136,7 @@ Resources:
             - stopped
             - terminated
       Targets:
-        - Arn: !Ref SlackNotifierSNSTopic
+        - Arn: !Ref ServerlessNotifierSNSTopic
           Id: Send2SNS
           InputTransformer:
             InputPathsMap:
@@ -157,7 +157,7 @@ Resources:
         detail-type: 
           - AWS Health Event
       Targets:
-        - Arn: !Ref SlackNotifierSNSTopic
+        - Arn: !Ref ServerlessNotifierSNSTopic
           Id: Send2SNS
           InputTransformer:
             InputPathsMap:
@@ -181,7 +181,7 @@ Resources:
         detail:
           severity: [ { "numeric": [ ">=", 4 ] } ]
       Targets:
-        - Arn: !Ref SlackNotifierSNSTopic
+        - Arn: !Ref ServerlessNotifierSNSTopic
           Id: Send2SNS
           InputTransformer:
             InputPathsMap:
