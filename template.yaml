@@ -64,12 +64,12 @@ Resources:
         SNSEvent:
           Type: SNS
           Properties:
-            Topic: !Ref TelegramNotifierSNSTopic
+            Topic: !Ref ServerlessNotifierSNSTopic
 
-  TelegramNotifierSNSTopic:
+  ServerlessNotifierSNSTopic:
     Type: AWS::SNS::Topic
 
-  TelegramNotifierSNSTopicPolicy:
+  ServerlessNotifierSNSTopicPolicy:
     Type: AWS::SNS::TopicPolicy
     Properties:
       PolicyDocument:
@@ -82,7 +82,7 @@ Resources:
               AWS: "*"
             Action:
               - sns:Publish
-            Resource: !Ref TelegramNotifierSNSTopic
+            Resource: !Ref ServerlessNotifierSNSTopic
             Condition:
               StringEquals:
                 "AWS:SourceOwner": !Ref "AWS::AccountId"
@@ -92,16 +92,16 @@ Resources:
               Service: "events.amazonaws.com"
             Action:
               - sns:Publish
-            Resource: !Ref TelegramNotifierSNSTopic
+            Resource: !Ref ServerlessNotifierSNSTopic
           - Sid: Costalerts_Statement
             Effect: Allow
             Principal:
               Service: "costalerts.amazonaws.com"
             Action:
               - sns:Publish
-            Resource: !Ref TelegramNotifierSNSTopic
+            Resource: !Ref ServerlessNotifierSNSTopic
       Topics:
-        - !Ref TelegramNotifierSNSTopic
+        - !Ref ServerlessNotifierSNSTopic
 
   BotTokenSecret:
     Type: AWS::SecretsManager::Secret
@@ -134,7 +134,7 @@ Resources:
         - !Ref AnomalyServiceMonitor
       Subscribers:
         - Type: "SNS"
-          Address: !Ref TelegramNotifierSNSTopic
+          Address: !Ref ServerlessNotifierSNSTopic
 
   EventRuleEC2StateChange:
     Type: AWS::Events::Rule
@@ -151,7 +151,7 @@ Resources:
             - stopped
             - terminated
       Targets:
-        - Arn: !Ref TelegramNotifierSNSTopic
+        - Arn: !Ref ServerlessNotifierSNSTopic
           Id: Send2SNS
           InputTransformer:
             InputPathsMap:
@@ -172,7 +172,7 @@ Resources:
         detail-type:
           - AWS Health Event
       Targets:
-        - Arn: !Ref TelegramNotifierSNSTopic
+        - Arn: !Ref ServerlessNotifierSNSTopic
           Id: Send2SNS
           InputTransformer:
             InputPathsMap:
@@ -196,7 +196,7 @@ Resources:
         detail:
           severity: [ { "numeric": [ ">=", 4 ] } ]
       Targets:
-        - Arn: !Ref SlackNotifierSNSTopic
+        - Arn: !Ref ServerlessNotifierSNSTopic
           Id: Send2SNS
           InputTransformer:
             InputPathsMap:
