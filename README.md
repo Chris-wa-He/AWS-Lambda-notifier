@@ -48,6 +48,9 @@
 2022-10-16:
 添加 AWS Cost Anomaly Detection 集成。
 
+2022-11-2:
+添加 Amazon GuardDuty 集成。
+
 ## 附录
 
 [AWS博客：基于AWS Serverless 一键启用微信/钉钉告警通知
