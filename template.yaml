@@ -169,3 +169,33 @@ Resources:
             InputTemplate:
               "\"AWS健康事件: \\n时间: <time> \\n区域: <region> \\n受影响资源: <resource> \\n类型: <type> \\n描述: <desc>\""
 
+  EventRuleDuardDutyFinding:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Notification rule：DuardDuty Finding
+      EventPattern:
+        source:
+          - aws.guardduty
+        detail-type:
+          - GuardDuty Finding
+        detail:
+          severity: [ { "numeric": [ ">=", 4 ] } ]
+      Targets:
+        - Arn: !Ref SlackNotifierSNSTopic
+          Id: Send2SNS
+          InputTransformer:
+            InputPathsMap:
+              severity: "$.detail.severity"
+              Finding_ID: "$.detail.id"
+              instanceId: "$.detail.resource.instanceDetails.instanceId"
+              port: "$.detail.service.action.networkConnectionAction.localPortDetails.port"
+              eventFirstSeen: "$.detail.service.eventFirstSeen"
+              eventLastSeen: "$.detail.service.eventLastSeen"
+              count: "$.detail.service.count"
+              Finding_Type: "$.detail.type"
+              region: "$.region"
+              time: "$.time"
+              title: "$.detail.title"
+              Finding_description: "$.detail.description"
+            InputTemplate:
+              "\"Guard Duty 发现异常事件: \\n时间: <time> \\n区域: <region> \\n可疑行为等级: <severity> \\n可疑行为类型: <Finding_Type> \\n可疑行为名称: <title> \\n描述: <Finding_description> \\n已发生次数: <count> \\n事件链接: https://console.aws.amazon.com/guardduty/home?region=<region>#/findings?search=id%3D<Finding_ID> \\n请尽快处理！\""
