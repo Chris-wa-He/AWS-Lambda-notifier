@@ -172,7 +172,7 @@ Resources:
   EventRuleDuardDutyFinding:
     Type: AWS::Events::Rule
     Properties:
-      Description: Notification rule：DuardDuty Finding
+      Description: Notification rule：GuardDuty Finding
       EventPattern:
         source:
           - aws.guardduty
