@@ -177,7 +177,7 @@ Resources:
             InputTemplate:
               "\"AWS健康事件: \\n时间: <time> \\n区域: <region> \\n受影响资源: <resource> \\n类型: <type> \\n描述: <desc>\""
 
-  EventRuleDuardDutyFinding:
+  EventRuleGuardDutyFinding:
     Type: AWS::Events::Rule
     Properties:
       Description: Notification rule：GuardDuty Finding
