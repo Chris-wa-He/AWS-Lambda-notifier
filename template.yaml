@@ -10,7 +10,7 @@ Metadata:
     ReadmeUrl: README_sar.md
     Labels: [ 'Telegram', 'Eventbridge' ]
     HomePageUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
-    SemanticVersion: 1.3.0
+    SemanticVersion: 1.4.0
     SourceCodeUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
 
 
@@ -21,11 +21,6 @@ Parameters:
   ChatId:
     Type: String
     Description: "Telegram chat ID. User ID or Group ID is accepted.\n Sample: userId:xxxxxxxxxx, groupId:-xxxxxxxxxx"
-
-  AnomalyThreshold:
-    Type: Number
-    Default: 100
-    Description: "Threshold for service anomaly use."
 
 Resources:
   TelegramNotifierLambdaLayer:
@@ -117,30 +112,11 @@ Resources:
       SecretString:
         Ref: ChatId
 
-  AnomalyServiceMonitor:
-    Type: "AWS::CE::AnomalyMonitor"
-    Properties:
-      MonitorName: "AllServiceMonitor"
-      MonitorType: "DIMENSIONAL"
-      MonitorDimension: "SERVICE"
-
-  AnomalySubscription:
-    Type: "AWS::CE::AnomalySubscription"
-    Properties:
-      SubscriptionName: "AnomalyServiceMonitoring"
-      Threshold: !Ref AnomalyThreshold
-      Frequency: "IMMEDIATE"
-      MonitorArnList:
-        - !Ref AnomalyServiceMonitor
-      Subscribers:
-        - Type: "SNS"
-          Address: !Ref ServerlessNotifierSNSTopic
-
   EventRuleEC2StateChange:
     Type: AWS::Events::Rule
     Properties:
-      Description: Telegram notification：EC2 instance state change
-      EventPattern:
+      Description: Rule for EC2 instance state change
+      EventPattern: 
         source:
           - aws.ec2
         detail-type:
@@ -162,11 +138,11 @@ Resources:
             InputTemplate:
               "\"EC2状态变化告警: \\n时间: <time> \\n区域: <region> \\n实例id: <instance-id> \\n状态: <state>\""
 
-  EventRuleEC2Health:
+  EventRuleAwsHealth:
     Type: AWS::Events::Rule
     Properties:
-      Description: Telegram notification：AWS Health event
-      EventPattern:
+      Description: Rule for AWS Health event
+      EventPattern: 
         source:
           - aws.health
         detail-type:
@@ -184,33 +160,25 @@ Resources:
             InputTemplate:
               "\"AWS健康事件: \\n时间: <time> \\n区域: <region> \\n受影响资源: <resource> \\n类型: <type> \\n描述: <desc>\""
 
-  EventRuleGuardDutyFinding:
+  EventRuleCloudWatchAlarmStateChange:
     Type: AWS::Events::Rule
     Properties:
-      Description: Notification rule：GuardDuty Finding
+      Description: Rule for Cloud Watch alarm state change
       EventPattern:
-        source:
-          - aws.guardduty
         detail-type:
-          - GuardDuty Finding
-        detail:
-          severity: [ { "numeric": [ ">=", 4 ] } ]
+          - CloudWatch Alarm State Change
+        source:
+          - aws.cloudwatch
       Targets:
-        - Arn: !Ref ServerlessNotifierSNSTopic
-          Id: Send2SNS
+        - Id: Send2SNS
+          Arn: !Ref ServerlessNotifierSNSTopic
           InputTransformer:
             InputPathsMap:
-              severity: "$.detail.severity"
-              Finding_ID: "$.detail.id"
-              instanceId: "$.detail.resource.instanceDetails.instanceId"
-              port: "$.detail.service.action.networkConnectionAction.localPortDetails.port"
-              eventFirstSeen: "$.detail.service.eventFirstSeen"
-              eventLastSeen: "$.detail.service.eventLastSeen"
-              count: "$.detail.service.count"
-              Finding_Type: "$.detail.type"
-              region: "$.region"
-              time: "$.time"
-              title: "$.detail.title"
-              Finding_description: "$.detail.description"
+              alarmName: $.detail.alarmName
+              description: $.detail.configuration.description
+              reason: $.detail.state.reason
+              region: $.region
+              resources: $.resources
+              time: $.time
             InputTemplate:
-              "\"Guard Duty 发现异常事件: \\n时间: <time> \\n区域: <region> \\n可疑行为等级: <severity> \\n可疑行为类型: <Finding_Type> \\n可疑行为名称: <title> \\n描述: <Finding_description> \\n已发生次数: <count> \\n事件链接: https://console.aws.amazon.com/guardduty/home?region=<region>#/findings?search=id%3D<Finding_ID> \\n请尽快处理！\""
+              "\"Cloud Watch 状态变化告警: \\n时间: <time> \\n区域: <region> \\n资源: <resources> \\n告警名称: <alarmName> \\n描述: <description> \\n原因: <reason>\""
