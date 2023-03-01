@@ -51,6 +51,11 @@
 2022-11-2:
 添加 Amazon GuardDuty 集成。
 
+2023-02-28:
+1. 转换 AWS 服务接入方式为插件模式，插件项目请参见[项目: AWS-Lambda-notifier-plugin](https://github.com/Chris-wa-He/AWS-Lambda-notifier-plugin)
+2. 添加 Cloud Watch alarm state change 作为默认规则
+3. 移除 AWS Cost Anomaly Detection & Amazon GuardDuty 集成，实现转移至[项目: AWS-Lambda-notifier-plugin](https://github.com/Chris-wa-He/AWS-Lambda-notifier-plugin)
+
 ## 附录
 
 [AWS博客：基于AWS Serverless 一键启用微信/钉钉告警通知
