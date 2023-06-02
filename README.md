@@ -36,6 +36,9 @@
 2. 添加 Cloud Watch alarm state change 作为默认规则
 3. 移除 AWS Cost Anomaly Detection & Amazon GuardDuty 集成，实现转移至[项目: AWS-Lambda-notifier-plugin](https://github.com/Chris-wa-He/AWS-Lambda-notifier-plugin)
 
+2023-06-2:
+添加 Event Bridge name 与 SNS ARN 作为输出，方便作为 plugin 集成参数输入。 
+
 ## 附录
 
 [AWS博客：基于AWS Serverless 一键启用微信/钉钉告警通知
