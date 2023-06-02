@@ -10,7 +10,7 @@ Metadata:
     ReadmeUrl: README_sar.md
     Labels: ['Slack', 'Eventbridge']
     HomePageUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
-    SemanticVersion: 1.4.0
+    SemanticVersion: 1.4.1
     SourceCodeUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
 
 
@@ -167,3 +167,11 @@ Resources:
               time: $.time
             InputTemplate:
               "\"Cloud Watch 状态变化告警: \\n时间: <time> \\n区域: <region> \\n资源: <resources> \\n告警名称: <alarmName> \\n描述: <description> \\n原因: <reason>\""
+
+Outputs:
+  EventBusName:
+    Description: Event Bus name for integration.
+    Value: 'default'
+  SnsTopicArn:
+    Description: SNS topic ARN for integration.
+    Value: !Ref ServerlessNotifierSNSTopic
