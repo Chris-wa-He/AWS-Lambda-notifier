@@ -16,9 +16,15 @@
 
 ![查找](images/search_sar.png)
 
+## 默认包含的通知事件
+* AWS Health Event
+* AWS Health Abuse Event
+* EC2 Instance State-change
+* CloudWatch Alarm State Change
+
 ## 致谢
 
-本项目使用的企业微信对接代码是在 Niko Feng 之前[项目](https://github.com/nikosheng/wechat-lambda-layer-sam)的基础上增加了异常处理和将密钥保存在Secrets Manager等调整。在此对 Niko 表示感谢！
+本项目基于 Niko Feng 企业微信对接[项目](https://github.com/nikosheng/wechat-lambda-layer-sam) 与 Randy Lin SAR部署[项目](https://github.com/linjungz/wechat-notifier.git) 的基础上修改 Slack 对接实现及部署模板完成。在此对 Niko 与 Randy 表示感谢！
 
 ## 更新历史
 
@@ -38,6 +44,9 @@
 
 2023-06-2:
 添加 Event Bridge name 与 SNS ARN 作为输出，方便作为 plugin 集成参数输入。 
+
+2023-06-14:
+添加捕获 AWS Health Abuse Event 作为默认事件。
 
 ## 附录
 

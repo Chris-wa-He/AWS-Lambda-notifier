@@ -10,7 +10,7 @@ Metadata:
     ReadmeUrl: README_sar.md
     Labels: ['WeChat', 'Eventbridge']
     HomePageUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
-    SemanticVersion: 1.4.1
+    SemanticVersion: 1.4.2
     SourceCodeUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
 
 Parameters:
@@ -135,10 +135,10 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Description: Rule for AWS Health event
-      EventPattern: 
-        source: 
+      EventPattern:
+        source:
           - aws.health
-        detail-type: 
+        detail-type:
           - AWS Health Event
       Targets:
         - Arn: !Ref ServerlessNotifierSNSTopic
@@ -152,6 +152,29 @@ Resources:
               desc: "$.detail.eventDescription[0].latestDescription"
             InputTemplate:
               "\"AWS健康事件: \\n时间: <time> \\n区域: <region> \\n受影响资源: <resource> \\n类型: <type> \\n描述: <desc>\""
+
+  EventRuleAwsHealthAbuse:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Rule for AWS Health Abuse event
+      EventPattern:
+        source:
+          - aws.health
+        detail-type:
+          - AWS Health Abuse Event
+      Targets:
+        - Arn: !Ref ServerlessNotifierSNSTopic
+          Id: Send2SNS
+          InputTransformer:
+            InputPathsMap:
+              resource: "$.resources"
+              region: "$.region"
+              time: "$.time"
+              startTime: "$.detail.startTime"
+              type: "$.detail.eventTypeCode"
+              desc: "$.detail.eventDescription[0].latestDescription"
+            InputTemplate:
+              "\"AWS异常使用事件: \\n通知生成时间: <time> \\n事件开始时间: <startTime> \\n区域: <region> \\n受影响资源: <resource> \\n类型: <type> \\n描述: <desc>\""
 
   EventRuleCloudWatchAlarmStateChange:
     Type: AWS::Events::Rule
