@@ -16,6 +16,15 @@
 
 ![查找](images/search_sar.png)
 
+## 注意
+
+本示例通过企业微信应用直接推送给指定的部门、员工
+
+1. 企业微信限制，需要将消息发送 API 调用的 IP 添加为“信任 IP”，具体参考[这里](https://open.work.weixin.qq.com/devtool/query?e=60020)
+2. 为固定 Lambda 的出口 IP，需要参考[这里](https://repost.aws/zh-Hans/knowledge-center/lambda-static-ip)设置 Lambda 的子网
+
+为简化配置，可借助 `DingTalk-Notifer` 分支，配置推送消息到企业微信群。
+
 ## 默认包含的通知事件
 * AWS Health Event
 * AWS Health Abuse Event
