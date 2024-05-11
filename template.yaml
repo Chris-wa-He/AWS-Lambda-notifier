@@ -8,16 +8,76 @@ Metadata:
     SpdxLicenseId: Apache-2.0
     LicenseUrl: LICENSE.txt
     ReadmeUrl: README_sar.md
-    Labels: ['Feishu', 'Eventbridge']
+    Labels: [ 'Feishu', 'Eventbridge' ]
     HomePageUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
-    SemanticVersion: 1.4.2
+    SemanticVersion: 1.5.0
     SourceCodeUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
-
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Notifier Parameters"
+        Parameters:
+          - WebhookURL
+          - EnableDebug
+      - Label:
+          default: "Large Language Model Parameters"
+        Parameters:
+          - EnableLLM
+          - LlmRegion
+          - LlmModelId
+          - AnthropicVersion
+          - LlmMaxTokens
+          - SystemPrompt
+    ParameterLabels:
+      WebhookURL:
+        default: "WebhookURL (Required)"
+      EnableDebug:
+        default: "Enable Debug (Optional)"
+      EnableLLM:
+        default: "EnableLLM (Required)"
+      LlmRegion:
+        default: "LLM Region (Optional)"
+      LlmModelId:
+        default: "LLM Model Id (Optional)"
+      AnthropicVersion:
+        default: "Anthropic Version (Optional)"
+      LlmMaxTokens:
+        default: "LLM Max Tokens (Optional)"
+      SystemPrompt:
+        default: "System Prompt (Optional)"
 
 Parameters:
   WebhookURL:
     Type: String
     Description: "Feishu Chat bot URL includes security token.\n Sample: https://open.feishu.cn/open-apis/bot/v2/hook/XXXXXXXX"
+  EnableDebug:
+    Type: String
+    Default: "false"
+    Description: "Enable debug mode.\n Sample: true"
+  EnableLLM:
+    Type: String
+    Default: "false"
+    Description: "Enable LLM to generate response message.\n Sample: true"
+  LlmRegion:
+    Type: String
+    Default: "us-east-1"
+    Description: "LLM region. \n Sample: us-east-1"
+  LlmModelId:
+    Type: String
+    Default: "anthropic.claude-3-haiku-20240307-v1:0"
+    Description: "LLM model id. \n Sample: anthropic.claude-3-sonnet-20240229-v1:0"
+  AnthropicVersion:
+    Type: String
+    Default: "bedrock-2023-05-31"
+    Description: "Anthropic version. \n Sample: bedrock-2023-05-31"
+  LlmMaxTokens:
+    Type: Number
+    Default: 1024
+    Description: "LLM max tokens. \n Sample: 1024"
+  SystemPrompt:
+    Type: String
+    Default: ""
+    Description: "For customize System prompt."
 
 Resources:
   FeishuNotifierLambdaLayer:
@@ -27,32 +87,54 @@ Resources:
       Description: v.1.0.5
       ContentUri: layer/
       CompatibleRuntimes:
-      - python3.6
-      - python3.7
-      - python3.8
-      - python3.9
+        - python3.6
+        - python3.7
+        - python3.8
+        - python3.9
 
   FeishuNotifierLambda:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: notifier/
       Handler: app.lambda_handler
-      Layers: 
+      Timeout: 180
+      Layers:
         - !Ref FeishuNotifierLambdaLayer
       Environment:
         Variables:
           SECRET_ARN:
             Ref: WebhookSecret
+          ENABLE_DEBUG:
+            Ref: EnableDebug
+          EnableLLM:
+            Ref: EnableLLM
+          LLM_REGION:
+            Ref: LlmRegion
+          LLM_MODEL_ID:
+            Ref: LlmModelId
+          Anthropic_Version:
+            Ref: AnthropicVersion
+          LLM_Max_Tokens:
+            Ref: LlmMaxTokens
+          System_Prompt:
+            Ref: SystemPrompt
       Runtime: python3.9
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn: !Ref WebhookSecret
+        - Statement:
+            - Sid: BedrockInvokePolicy
+              Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+                - bedrock:InvokeModelWithResponseStream
+              Resource: 'arn:aws:bedrock:*::foundation-model/*'
       Events:
         SNSEvent:
           Type: SNS
-          Properties: 
+          Properties:
             Topic: !Ref ServerlessNotifierSNSTopic
-          
+
   ServerlessNotifierSNSTopic:
     Type: AWS::SNS::Topic
 
@@ -67,7 +149,7 @@ Resources:
             Effect: Allow
             Principal:
               AWS: "*"
-            Action: 
+            Action:
               - sns:Publish
             Resource: !Ref ServerlessNotifierSNSTopic
             Condition:
@@ -77,7 +159,7 @@ Resources:
             Effect: Allow
             Principal:
               Service: "events.amazonaws.com"
-            Action: 
+            Action:
               - sns:Publish
             Resource: !Ref ServerlessNotifierSNSTopic
           - Sid: Costalerts_Statement
@@ -88,11 +170,11 @@ Resources:
               - sns:Publish
             Resource: !Ref ServerlessNotifierSNSTopic
       Topics:
-      - !Ref ServerlessNotifierSNSTopic
+        - !Ref ServerlessNotifierSNSTopic
 
   WebhookSecret:
     Type: AWS::SecretsManager::Secret
-    Properties: 
+    Properties:
       Description: 'WebhookSecret: Store Chat bot URL'
       SecretString:
         Ref: WebhookURL
@@ -101,10 +183,10 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Description: Rule for EC2 instance state change
-      EventPattern: 
-        source: 
+      EventPattern:
+        source:
           - aws.ec2
-        detail-type: 
+        detail-type:
           - EC2 Instance State-change Notification
         detail:
           state:
