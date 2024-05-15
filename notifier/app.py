@@ -1,13 +1,24 @@
 import boto3
 import os
 
+from botocore.exceptions import ClientError
+
 from telegram import Telegram
 from alarm import Alarm
+from claude import claudeHelper
 
 send_msg_url = os.environ['SEND_MSG_URL']
 
 bot_token_secret_arn = os.environ['BotTokenSecret_ARN']
 chat_id_secret_arn = os.environ['ChatIdSecret_ARN']
+
+enableDebug = os.environ['ENABLE_DEBUG']
+enableLlm = os.environ['EnableLLM']
+llmRegion = os.environ['LLM_REGION']
+llmModelID = os.environ['LLM_MODEL_ID']
+anthropicVersion = os.environ['Anthropic_Version']
+llmMaxTokens = os.environ['LLM_Max_Tokens']
+systemPrompt = os.environ['System_Prompt']
 
 secret_manager_client = boto3.client('secretsmanager')
 
@@ -33,7 +44,21 @@ telegram = Telegram(send_msg_api_url)
 def lambda_handler(event, context):
     print(event)
     msg = msg_format(event)
-    print(msg)
+    print("Original message:" + msg)
+
+    if enableLlm == "true":
+        claude = claudeHelper(region=llmRegion, model_id=llmModelID,
+                              anthropic_version=anthropicVersion, max_tokens=int(llmMaxTokens),
+                              system_prompt=systemPrompt,
+                              enable_debug=bool(enableDebug))
+
+        try:
+            llmRsp = claude.invoke_claude_3_with_text(prompt=msg)
+            msg = llmRsp + "\n\n------------------\nOriginal message:\n" + msg
+        except ClientError as err:
+            print("Invoke Claude 3 error:")
+            print(err.response["Error"]["Code"])
+            print(err.response["Error"]["Message"])
 
     tg_alarm = Alarm(
 
