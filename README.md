@@ -27,11 +27,25 @@
 
 ![部署](images/deployment.png)
 
+LLM 相关部署选项
+![llm_parameter](images/llm_parameter.png)
+
+LLM 参数均为可选，默认值如上图所示。自定义 System Prompt 请参考 [defaultSystemPrompt](layer/python/claude.py) 进行定制。
+
 ## 提示效果
 
 提示效果如下：
 
 ![提示效果](images/notification.png)
+
+## 通过 LLM 进行消息整理效果
+
+原消息：
+
+![原信息](images/origin_msg.png)
+
+梳理完成消息：
+![整理信息](images/sort_msg.png)
 
 ## 默认包含的通知事件
 * AWS Health Event
@@ -64,6 +78,9 @@ Slack Incoming WebHook 纯文本警告推送功能实现。
 
 2023-06-14:
 添加捕获 AWS Health Abuse Event 作为默认事件。
+
+2024-05-16:
+添加添加连接 Bedrock 托管 LLM 的能力，进行信息梳理。
 
 ## 附录
 
