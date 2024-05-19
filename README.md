@@ -8,7 +8,7 @@
 
 ![整体部署架构](images/architecture.png)
 
-为方便演示，这个应用部署时创建了两个EventBridge的Rule，一个是捕获EC2的状态变化事件（如开关机），另一个是捕获EC2健康事件（如EC2计划维护事件）。因此部署后可以通过简单的启动或关闭EC2实例来检查是否可以在 Slack 收到通知。
+为方便演示，这个应用部署时创建了两个EventBridge的Rule，一个是捕获EC2的状态变化事件（如开关机），另一个是捕获 AWS 健康事件（如EC2计划维护事件）。因此部署后可以通过简单的启动或关闭EC2实例来检查是否可以在 Slack 收到通知。
 
 ## Slack Incoming WebHook 创建与 Webhook URL
 
