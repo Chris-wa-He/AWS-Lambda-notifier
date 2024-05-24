@@ -7,7 +7,7 @@ from botocore.exceptions import ClientError
 
 class claudeHelper:
 
-    def __init__(self, region="us-east-1", model_id="anthropic.claude-3-haiku-20240307-v1:0",
+    def __init__(self, region="us-east-1", model_id="anthropic.claude-3-sonnet-20240229-v1:0",
                  anthropic_version="bedrock-2023-05-31", max_tokens=1024, system_prompt="", enable_debug=False):
 
         self.enable_debug = enable_debug
