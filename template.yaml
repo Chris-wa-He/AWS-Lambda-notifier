@@ -10,7 +10,7 @@ Metadata:
     ReadmeUrl: README_sar.md
     Labels: [ 'Telegram', 'Eventbridge' ]
     HomePageUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
-    SemanticVersion: 1.5.0
+    SemanticVersion: 1.5.1
     SourceCodeUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -70,7 +70,7 @@ Parameters:
     Description: "LLM region. \n Sample: us-east-1"
   LlmModelId:
     Type: String
-    Default: "anthropic.claude-3-haiku-20240307-v1:0"
+    Default: "anthropic.claude-3-sonnet-20240229-v1:0"
     Description: "LLM model id. \n Sample: anthropic.claude-3-sonnet-20240229-v1:0"
   AnthropicVersion:
     Type: String
