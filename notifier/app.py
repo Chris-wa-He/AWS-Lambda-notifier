@@ -5,14 +5,13 @@ from botocore.exceptions import ClientError
 
 from feishu import Feishu
 from alarm import Alarm
-from claude import claudeHelper
+from converse_api import converseApiCaller
 
 secretArn = os.environ['SECRET_ARN']
 enableDebug = os.environ['ENABLE_DEBUG']
 enableLlm = os.environ['EnableLLM']
 llmRegion = os.environ['LLM_REGION']
 llmModelID = os.environ['LLM_MODEL_ID']
-anthropicVersion = os.environ['Anthropic_Version']
 llmMaxTokens = os.environ['LLM_Max_Tokens']
 systemPrompt = os.environ['System_Prompt']
 
@@ -33,16 +32,15 @@ def lambda_handler(event, context):
     print("Original message:" + msg)
 
     if enableLlm == "true":
-        claude = claudeHelper(region=llmRegion, model_id=llmModelID,
-                              anthropic_version=anthropicVersion, max_tokens=int(llmMaxTokens),
-                              system_prompt=systemPrompt,
-                              enable_debug=bool(enableDebug))
+        converseApi = converseApiCaller(region=llmRegion, model_id=llmModelID, max_tokens=int(llmMaxTokens),
+                                        prompt=systemPrompt,
+                                        enable_debug=bool(enableDebug))
 
         try:
-            llmRsp = claude.invoke_claude_3_with_text(prompt=msg)
+            llmRsp = converseApi.invoke_converse_api(input_text=msg)
             msg = llmRsp + "\n\n------------------\nOriginal message:\n" + msg
         except ClientError as err:
-            print("Invoke Claude 3 error:")
+            print("Invoke Bedrock Converse API error:")
             print(err.response["Error"]["Code"])
             print(err.response["Error"]["Message"])
 

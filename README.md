@@ -85,6 +85,9 @@ LLM 参数均为可选，默认值如上图所示。自定义 System Prompt 请�
 2024-05-16:
 添加添加连接 Bedrock 托管 LLM 的能力，进行信息梳理。
 
+2024-12-11:
+使用 Converse API 调用 Bedrock 模型。默认使用模型调整为 Amazon Nova Lite。
+
 ## 附录
 
 [AWS博客：基于AWS Serverless 一键启用微信/钉钉告警通知
