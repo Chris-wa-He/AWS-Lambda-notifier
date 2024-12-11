@@ -25,16 +25,27 @@ secretURL = get_secret_value_response['SecretString']
 # Initial Feishu handler
 feishu = Feishu(secretURL)
 
+# Convert string to boolean
+def str_to_bool(str):
+    if str.lower() == 'true':
+        return True
+    elif str.lower() == 'false':
+        return False
+    else:
+        return False
 
 def lambda_handler(event, context):
     print(event)
     msg = msg_format(event)
     print("Original message:" + msg)
 
-    if enableLlm == "true":
+    enableLlmBool = str_to_bool(enableLlm)
+    enableDebugBool = str_to_bool(enableDebug)
+
+    if enableLlmBool:
         converseApi = converseApiCaller(region=llmRegion, model_id=llmModelID, max_tokens=int(llmMaxTokens),
                                         prompt=systemPrompt,
-                                        enable_debug=bool(enableDebug))
+                                        enable_debug=enableDebugBool)
 
         try:
             llmRsp = converseApi.invoke_converse_api(input_text=msg)
