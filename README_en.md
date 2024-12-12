@@ -83,6 +83,9 @@ Added capturing AWS Health Abuse Event as a default event.
 2024-05-16:
 Added the ability to connect to the Bedrock-managed LLM for information sorting.
 
+2024-12-11:
+Use the Converse API to call Bedrock models. The default usage model is tuned to Amazon Nova Lite.
+
 ## Appendix
 
 [AWS Blog: Enable WeChat/DingTalk Alarm Notification with One-Click Based on AWS Serverless](https://aws.amazon.com/cn/blogs/china/enable-wechat-dingtalk-alarm-notification-with-one-click-based-on-aws-serverless/)
