@@ -10,7 +10,7 @@ Metadata:
     ReadmeUrl: README_sar.md
     Labels: ['Slack', 'Eventbridge']
     HomePageUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
-    SemanticVersion: 1.5.1
+    SemanticVersion: 1.6.1
     SourceCodeUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -39,8 +39,6 @@ Metadata:
         default: "LLM Region (Optional)"
       LlmModelId:
         default: "LLM Model Id (Optional)"
-      AnthropicVersion:
-        default: "Anthropic Version (Optional)"
       LlmMaxTokens:
         default: "LLM Max Tokens (Optional)"
       SystemPrompt:
@@ -64,15 +62,11 @@ Parameters:
     Description: "LLM region. \n Sample: us-east-1"
   LlmModelId:
     Type: String
-    Default: "anthropic.claude-3-sonnet-20240229-v1:0"
-    Description: "LLM model id. \n Sample: anthropic.claude-3-sonnet-20240229-v1:0"
-  AnthropicVersion:
-    Type: String
-    Default: "bedrock-2023-05-31"
-    Description: "Anthropic version. \n Sample: bedrock-2023-05-31"
+    Default: "amazon.nova-lite-v1:0"
+    Description: "LLM model id. The model id needs to be in the support list of the Bedrock Converse API.\n Sample: anthropic.claude-3-sonnet-20240229-v1:0"
   LlmMaxTokens:
     Type: Number
-    Default: 1024
+    Default: 2048
     Description: "LLM max tokens. \n Sample: 1024"
   SystemPrompt:
     Type: String
@@ -112,8 +106,6 @@ Resources:
             Ref: LlmRegion
           LLM_MODEL_ID:
             Ref: LlmModelId
-          Anthropic_Version:
-            Ref: AnthropicVersion
           LLM_Max_Tokens:
             Ref: LlmMaxTokens
           System_Prompt:
