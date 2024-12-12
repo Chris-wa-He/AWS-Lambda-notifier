@@ -5,7 +5,7 @@ from botocore.exceptions import ClientError
 
 from telegram import Telegram
 from alarm import Alarm
-from claude import claudeHelper
+from converse_api import converseApiCaller
 
 send_msg_url = os.environ['SEND_MSG_URL']
 
@@ -16,7 +16,6 @@ enableDebug = os.environ['ENABLE_DEBUG']
 enableLlm = os.environ['EnableLLM']
 llmRegion = os.environ['LLM_REGION']
 llmModelID = os.environ['LLM_MODEL_ID']
-anthropicVersion = os.environ['Anthropic_Version']
 llmMaxTokens = os.environ['LLM_Max_Tokens']
 systemPrompt = os.environ['System_Prompt']
 
@@ -41,22 +40,33 @@ send_msg_api_url = send_msg_url.format(bot_token)
 telegram = Telegram(send_msg_api_url)
 
 
+# Convert string to boolean
+def str_to_bool(str):
+    if str.lower() == 'true':
+        return True
+    elif str.lower() == 'false':
+        return False
+    else:
+        return False
+
 def lambda_handler(event, context):
     print(event)
     msg = msg_format(event)
     print("Original message:" + msg)
 
-    if enableLlm == "true":
-        claude = claudeHelper(region=llmRegion, model_id=llmModelID,
-                              anthropic_version=anthropicVersion, max_tokens=int(llmMaxTokens),
-                              system_prompt=systemPrompt,
-                              enable_debug=bool(enableDebug))
+    enableLlmBool = str_to_bool(enableLlm)
+    enableDebugBool = str_to_bool(enableDebug)
+
+    if enableLlmBool:
+        converseApi = converseApiCaller(region=llmRegion, model_id=llmModelID, max_tokens=int(llmMaxTokens),
+                                        prompt=systemPrompt,
+                                        enable_debug=enableDebugBool)
 
         try:
-            llmRsp = claude.invoke_claude_3_with_text(prompt=msg)
+            llmRsp = converseApi.invoke_converse_api(input_text=msg)
             msg = llmRsp + "\n\n------------------\nOriginal message:\n" + msg
         except ClientError as err:
-            print("Invoke Claude 3 error:")
+            print("Invoke Bedrock Converse API error:")
             print(err.response["Error"]["Code"])
             print(err.response["Error"]["Message"])
 
