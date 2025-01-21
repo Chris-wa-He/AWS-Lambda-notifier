@@ -23,7 +23,8 @@ This example directly pushes messages to specified departments and employees thr
 1. Due to WeChat Work limitations, you need to add the IP address that calls the message sending API to the "Trusted IP" list. Please refer to [this link](https://open.work.weixin.qq.com/devtool/query?e=60020) for more information.
 2. To set a fixed egress IP for Lambda, you need to configure a subnet for Lambda, as described [here](https://repost.aws/zh-Hans/knowledge-center/lambda-static-ip).
 
-To simplify the configuration, you can use the `DingTalk-Notifer` branch to configure pushing messages to a WeChat Work group.
+> [!IMPORTANT]
+> To simplify the configuration, you can use the `DingTalk-Notifer` branch to configure pushing messages to a WeChat Work group.
 
 LLM-related deployment options:
 ![llm_parameter](images/llm_parameter.png)
