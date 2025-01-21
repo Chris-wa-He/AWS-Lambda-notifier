@@ -21,6 +21,9 @@
 
 ![关键词](images/dingtalk-sec-setting.png)
 
+> [!TIP]
+> DingTalk-notifier 兼容企业微信群机器人
+
 ## 在 Serverless Application Repository 中部署此应用
 
 可以在 SAR 中搜索 `DingTalk-notifier` 查到本应用（注意因为本项目会创建 EventBridge 到 SNS Publish 权限，所以按下图进行勾选。
