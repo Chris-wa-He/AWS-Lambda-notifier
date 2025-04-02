@@ -23,6 +23,8 @@
 
 > [!TIP]
 > DingTalk-notifier 兼容企业微信群机器人
+> 
+> 企业微信群机器人创建，请参考[官方说明](https://open.work.weixin.qq.com/help2/pc/14931)
 
 ## 在 Serverless Application Repository 中部署此应用
 
