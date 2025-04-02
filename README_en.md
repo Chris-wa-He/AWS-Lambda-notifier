@@ -23,6 +23,7 @@ Obtain the Webhook URL of the custom robot to use as a deployment parameter
 
 > [!TIP]
 > DingTalk-notifier is compatible with WeCom (WeChat Work) group robots
+> 
 > For creating WeCom group robots, please refer to the [official instructions](https://open.work.weixin.qq.com/help2/pc/14931)
 
 ## Deploying this Application in the Serverless Application Repository
