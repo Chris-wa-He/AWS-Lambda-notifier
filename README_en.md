@@ -88,6 +88,11 @@ Added the ability to connect to the Bedrock-managed LLM for information sorting.
 2024-12-11:
 Use the Converse API to call Bedrock models. The default usage model is tuned to Amazon Nova Lite.
 
+2025-12-08:
+1. Lambda runtime upgraded to python3.10, Layer added support for python3.10 and python3.11.
+2. Optimized event processing logic, removed InputTransformer for some events, unified formatting handled by Lambda.
+3. Improved CloudFormation template code standards.
+
 ## Appendix
 
 [AWS Blog: Enable WeChat/DingTalk Alarm Notification with One-Click Based on AWS Serverless](https://aws.amazon.com/cn/blogs/china/enable-wechat-dingtalk-alarm-notification-with-one-click-based-on-aws-serverless/)

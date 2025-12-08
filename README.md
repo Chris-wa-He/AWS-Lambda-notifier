@@ -88,6 +88,11 @@ LLM 参数均为可选，默认值如上图所示。自定义 System Prompt 请�
 2024-12-11:
 使用 Converse API 调用 Bedrock 模型。默认使用模型调整为 Amazon Nova Lite。
 
+2025-12-08:
+1. Lambda 运行时升级至 python3.10，Layer 新增支持 python3.10 和 python3.11。
+2. 优化事件处理逻辑，移除部分事件的 InputTransformer，由 Lambda 统一处理格式化。
+3. 改进 CloudFormation 模板代码规范性。
+
 ## 附录
 
 [AWS博客：基于AWS Serverless 一键启用微信/钉钉告警通知
