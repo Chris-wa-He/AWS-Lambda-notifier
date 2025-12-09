@@ -8,70 +8,83 @@ Metadata:
     SpdxLicenseId: Apache-2.0
     LicenseUrl: LICENSE.txt
     ReadmeUrl: README_sar.md
-    Labels: ['Slack', 'Eventbridge']
+    Labels:
+      - Slack
+      - Eventbridge
     HomePageUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
-    SemanticVersion: 1.6.1
+    SemanticVersion: 1.6.3
     SourceCodeUrl: https://github.com/Chris-wa-He/AWS-Lambda-notifier
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: "Notifier Parameters"
+          default: Notifier Parameters
         Parameters:
           - WebhookURL
           - EnableDebug
       - Label:
-          default: "Large Language Model Parameters"
+          default: Large Language Model Parameters
         Parameters:
           - EnableLLM
           - LlmRegion
           - LlmModelId
-          - AnthropicVersion
           - LlmMaxTokens
           - SystemPrompt
     ParameterLabels:
       WebhookURL:
-        default: "WebhookURL (Required)"
+        default: WebhookURL (Required)
       EnableDebug:
-        default: "Enable Debug (Optional)"
+        default: Enable Debug (Optional)
       EnableLLM:
-        default: "EnableLLM (Required)"
+        default: EnableLLM (Required)
       LlmRegion:
-        default: "LLM Region (Optional)"
+        default: LLM Region (Optional)
       LlmModelId:
-        default: "LLM Model Id (Optional)"
+        default: LLM Model Id (Optional)
       LlmMaxTokens:
-        default: "LLM Max Tokens (Optional)"
+        default: LLM Max Tokens (Optional)
       SystemPrompt:
-        default: "System Prompt (Optional)"
+        default: System Prompt (Optional)
 
 Parameters:
   WebhookURL:
     Type: String
-    Description: "Slack Webhook URL"
+    Description: |-
+      Slack Webhook URL.
+      Sample: https://hooks.slack.com/services/XXXXXXXX/XXXXXXXX/XXXXXXXX
   EnableDebug:
     Type: String
-    Default: "false"
-    Description: "Enable debug mode.\n Sample: true"
+    Default: 'false'
+    Description: |-
+      Enable debug mode.
+       Sample: true
   EnableLLM:
     Type: String
-    Default: "false"
-    Description: "Enable LLM to generate response message.\n Sample: true"
+    Default: 'false'
+    Description: |-
+      Enable LLM to generate response message.
+       Sample: true
   LlmRegion:
     Type: String
-    Default: "us-east-1"
-    Description: "LLM region. \n Sample: us-east-1"
+    Default: us-east-1
+    Description: |-
+      LLM region.
+       Sample: us-east-1
   LlmModelId:
     Type: String
-    Default: "amazon.nova-lite-v1:0"
-    Description: "LLM model id. The model id needs to be in the support list of the Bedrock Converse API.\n Sample: anthropic.claude-3-sonnet-20240229-v1:0"
+    Default: amazon.nova-lite-v1:0
+    Description: |-
+      LLM model id. The model id needs to be in the support list of the Bedrock Converse API.
+       Sample: anthropic.claude-3-sonnet-20240229-v1:0
   LlmMaxTokens:
     Type: Number
     Default: 2048
-    Description: "LLM max tokens. \n Sample: 1024"
+    Description: |-
+      LLM max tokens.
+       Sample: 1024
   SystemPrompt:
     Type: String
-    Default: ""
-    Description: "For customize System prompt."
+    Default: ''
+    Description: For customize System prompt.
 
 Resources:
   SlackNotifierLambdaLayer:
@@ -85,6 +98,8 @@ Resources:
         - python3.7
         - python3.8
         - python3.9
+        - python3.10
+        - python3.11
 
   SlackNotifierLambda:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -96,21 +111,14 @@ Resources:
         - !Ref SlackNotifierLambdaLayer
       Environment:
         Variables:
-          SECRET_ARN:
-            Ref: WebhookSecret
-          ENABLE_DEBUG:
-            Ref: EnableDebug
-          EnableLLM:
-            Ref: EnableLLM
-          LLM_REGION:
-            Ref: LlmRegion
-          LLM_MODEL_ID:
-            Ref: LlmModelId
-          LLM_Max_Tokens:
-            Ref: LlmMaxTokens
-          System_Prompt:
-            Ref: SystemPrompt
-      Runtime: python3.9
+          SECRET_ARN: !Ref WebhookSecret
+          ENABLE_DEBUG: !Ref EnableDebug
+          EnableLLM: !Ref EnableLLM
+          LLM_REGION: !Ref LlmRegion
+          LLM_MODEL_ID: !Ref LlmModelId
+          LLM_Max_Tokens: !Ref LlmMaxTokens
+          System_Prompt: !Ref SystemPrompt
+      Runtime: python3.10
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn: !Ref WebhookSecret
@@ -120,7 +128,7 @@ Resources:
               Action:
                 - bedrock:InvokeModel
                 - bedrock:InvokeModelWithResponseStream
-              Resource: 'arn:aws:bedrock:*::foundation-model/*'
+              Resource: arn:aws:bedrock:*::foundation-model/*
       Events:
         SNSEvent:
           Type: SNS
@@ -140,24 +148,24 @@ Resources:
           - Sid: Default_Statement
             Effect: Allow
             Principal:
-              AWS: "*"
+              AWS: '*'
             Action:
               - sns:Publish
             Resource: !Ref ServerlessNotifierSNSTopic
             Condition:
               StringEquals:
-                "AWS:SourceOwner": !Ref "AWS::AccountId"
+                AWS:SourceOwner: !Ref AWS::AccountId
           - Sid: Eventbridge_Statement
             Effect: Allow
             Principal:
-              Service: "events.amazonaws.com"
+              Service: events.amazonaws.com
             Action:
               - sns:Publish
             Resource: !Ref ServerlessNotifierSNSTopic
           - Sid: Costalerts_Statement
             Effect: Allow
             Principal:
-              Service: "costalerts.amazonaws.com"
+              Service: costalerts.amazonaws.com
             Action:
               - sns:Publish
             Resource: !Ref ServerlessNotifierSNSTopic
@@ -166,11 +174,10 @@ Resources:
 
   WebhookSecret:
     Type: AWS::SecretsManager::Secret
-    Properties: 
+    Properties:
       Description: 'Webhook URL'
-      SecretString:
-        Ref: WebhookURL
-
+      SecretString: !Ref WebhookURL
+      
   EventRuleEC2StateChange:
     Type: AWS::Events::Rule
     Properties:
@@ -190,12 +197,12 @@ Resources:
           Id: Send2SNS
           InputTransformer:
             InputPathsMap:
-              instance-id: "$.detail.instance-id"
-              region: "$.region"
-              state: "$.detail.state"
-              time: "$.time"
-            InputTemplate:
-              "\"EC2状态变化告警: \\n时间: <time> \\n区域: <region> \\n实例id: <instance-id> \\n状态: <state>\""
+              instance-id: $.detail.instance-id
+              region: $.region
+              state: $.detail.state
+              time: $.time
+            InputTemplate: '"EC2状态变化告警: \n时间: <time> \n区域: <region> \n实例id: <instance-id>
+              \n状态: <state>"'
 
   EventRuleAwsHealth:
     Type: AWS::Events::Rule
@@ -209,15 +216,15 @@ Resources:
       Targets:
         - Arn: !Ref ServerlessNotifierSNSTopic
           Id: Send2SNS
-          InputTransformer:
-            InputPathsMap:
-              resource: "$.resources[0]"
-              region: "$.region"
-              time: "$.time"
-              type: "$.detail.eventTypeCode"
-              desc: "$.detail.eventDescription[0].latestDescription"
-            InputTemplate:
-              "\"AWS健康事件: \\n时间: <time> \\n区域: <region> \\n受影响资源: <resource> \\n类型: <type> \\n描述: <desc>\""
+          # InputTransformer:
+          #   InputPathsMap:
+          #     resource: "$.resources[0]"
+          #     region: "$.region"
+          #     time: "$.time"
+          #     type: "$.detail.eventTypeCode"
+          #     desc: "$.detail.eventDescription[0].latestDescription"
+          #   InputTemplate:
+          #     "\"AWS健康事件: \\n时间: <time> \\n区域: <region> \\n受影响资源: <resource> \\n类型: <type> \\n描述: <desc>\""
 
   EventRuleAwsHealthAbuse:
     Type: AWS::Events::Rule
@@ -231,16 +238,16 @@ Resources:
       Targets:
         - Arn: !Ref ServerlessNotifierSNSTopic
           Id: Send2SNS
-          InputTransformer:
-            InputPathsMap:
-              resource: "$.resources"
-              region: "$.region"
-              time: "$.time"
-              startTime: "$.detail.startTime"
-              type: "$.detail.eventTypeCode"
-              desc: "$.detail.eventDescription[0].latestDescription"
-            InputTemplate:
-              "\"AWS异常使用事件: \\n通知生成时间: <time> \\n事件开始时间: <startTime> \\n区域: <region> \\n受影响资源: <resource> \\n类型: <type> \\n描述: <desc>\""
+          # InputTransformer:
+          #   InputPathsMap:
+          #     resource: "$.resources"
+          #     region: "$.region"
+          #     time: "$.time"
+          #     startTime: "$.detail.startTime"
+          #     type: "$.detail.eventTypeCode"
+          #     desc: "$.detail.eventDescription[0].latestDescription"
+          #   InputTemplate:
+          #     "\"AWS异常使用事件: \\n通知生成时间: <time> \\n事件开始时间: <startTime> \\n区域: <region> \\n受影响资源: <resource> \\n类型: <type> \\n描述: <desc>\""
 
   EventRuleCloudWatchAlarmStateChange:
     Type: AWS::Events::Rule
@@ -254,21 +261,21 @@ Resources:
       Targets:
         - Id: Send2SNS
           Arn: !Ref ServerlessNotifierSNSTopic
-          InputTransformer:
-            InputPathsMap:
-              alarmName: $.detail.alarmName
-              description: $.detail.configuration.description
-              reason: $.detail.state.reason
-              region: $.region
-              resources: $.resources
-              time: $.time
-            InputTemplate:
-              "\"Cloud Watch 状态变化告警: \\n时间: <time> \\n区域: <region> \\n资源: <resources> \\n告警名称: <alarmName> \\n描述: <description> \\n原因: <reason>\""
+          # InputTransformer:
+          #   InputPathsMap:
+          #     alarmName: $.detail.alarmName
+          #     description: $.detail.configuration.description
+          #     reason: $.detail.state.reason
+          #     region: $.region
+          #     resources: $.resources
+          #     time: $.time
+          #   InputTemplate:
+          #     "\"Cloud Watch 状态变化告警: \\n时间: <time> \\n区域: <region> \\n资源: <resources> \\n告警名称: <alarmName> \\n描述: <description> \\n原因: <reason>\""
 
 Outputs:
   EventBusName:
     Description: Event Bus name for integration.
-    Value: 'default'
+    Value: default
   SnsTopicArn:
     Description: SNS topic ARN for integration.
     Value: !Ref ServerlessNotifierSNSTopic
